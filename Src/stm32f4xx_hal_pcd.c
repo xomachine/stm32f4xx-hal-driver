@@ -2149,6 +2149,7 @@ HAL_StatusTypeDef HAL_PCD_SetTestMode(const PCD_HandleTypeDef *hpcd, uint8_t tes
     case TEST_SE0_NAK:
     case TEST_PACKET:
     case TEST_FORCE_EN:
+      USBx_DEVICE->DCTL &= ~(0x7U << 4);
       USBx_DEVICE->DCTL |= (uint32_t)testmode << 4;
       break;
 
