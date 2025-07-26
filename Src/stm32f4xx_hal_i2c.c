@@ -6951,7 +6951,7 @@ static void I2C_DMAXferCplt(DMA_HandleTypeDef *hdma)
     hi2c->hdmarx->XferCpltCallback = NULL;
   }
 
-  if ((((uint32_t)CurrentState & (uint32_t)HAL_I2C_STATE_BUSY_TX) == (uint32_t)HAL_I2C_STATE_BUSY_TX) || ((((uint32_t)CurrentState & (uint32_t)HAL_I2C_STATE_BUSY_RX) == (uint32_t)HAL_I2C_STATE_BUSY_RX) && (CurrentMode == HAL_I2C_MODE_SLAVE)))
+  if (((((uint32_t)CurrentState & (uint32_t)HAL_I2C_STATE_BUSY_TX) == (uint32_t)HAL_I2C_STATE_BUSY_TX) || (((uint32_t)CurrentState & (uint32_t)HAL_I2C_STATE_BUSY_RX) == (uint32_t)HAL_I2C_STATE_BUSY_RX)) && (CurrentMode == HAL_I2C_MODE_SLAVE))
   {
     /* Disable DMA Request */
     CLEAR_BIT(hi2c->Instance->CR2, I2C_CR2_DMAEN);
@@ -7037,11 +7037,22 @@ static void I2C_DMAXferCplt(DMA_HandleTypeDef *hdma)
         hi2c->Mode = HAL_I2C_MODE_NONE;
         hi2c->PreviousState = I2C_STATE_NONE;
 
+        if (CurrentState == HAL_I2C_STATE_BUSY_TX)
+        {
 #if (USE_HAL_I2C_REGISTER_CALLBACKS == 1)
-        hi2c->MemRxCpltCallback(hi2c);
+          hi2c->MemTxCpltCallback(hi2c);
 #else
-        HAL_I2C_MemRxCpltCallback(hi2c);
+          HAL_I2C_MemTxCpltCallback(hi2c);
 #endif /* USE_HAL_I2C_REGISTER_CALLBACKS */
+        }
+        else
+        {
+#if (USE_HAL_I2C_REGISTER_CALLBACKS == 1)
+          hi2c->MemRxCpltCallback(hi2c);
+#else
+          HAL_I2C_MemRxCpltCallback(hi2c);
+#endif /* USE_HAL_I2C_REGISTER_CALLBACKS */
+        }
       }
       else
       {
@@ -7055,11 +7066,22 @@ static void I2C_DMAXferCplt(DMA_HandleTypeDef *hdma)
           hi2c->PreviousState = I2C_STATE_MASTER_BUSY_RX;
         }
 
+        if (CurrentState == HAL_I2C_STATE_BUSY_TX)
+        {
 #if (USE_HAL_I2C_REGISTER_CALLBACKS == 1)
-        hi2c->MasterRxCpltCallback(hi2c);
+          hi2c->MasterTxCpltCallback(hi2c);
 #else
-        HAL_I2C_MasterRxCpltCallback(hi2c);
+          HAL_I2C_MasterTxCpltCallback(hi2c);
 #endif /* USE_HAL_I2C_REGISTER_CALLBACKS */
+        }
+        else
+        {
+#if (USE_HAL_I2C_REGISTER_CALLBACKS == 1)
+          hi2c->MasterRxCpltCallback(hi2c);
+#else
+          HAL_I2C_MasterRxCpltCallback(hi2c);
+#endif /* USE_HAL_I2C_REGISTER_CALLBACKS */
+        }
       }
     }
   }
